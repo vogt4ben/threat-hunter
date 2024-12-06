@@ -34,7 +34,7 @@ const DataTable = ({ title, data, monospaceContent = false }) => (
     }}
   >
     <Box sx={{ p: 1, pb: 1, flexShrink: 0 }}>
-      <Typography variant='subtitle2' color='text.secondary'>
+      <Typography variant='caption' color='text.secondary'>
         {title}
       </Typography>
     </Box>
@@ -69,9 +69,10 @@ const DataTable = ({ title, data, monospaceContent = false }) => (
                 <TableCell>
                   <Typography
                     variant='body2'
-                    sx={
-                      monospaceContent ? { fontFamily: 'monospace' } : undefined
-                    }
+                    sx={{
+                      fontSize: '0.875rem',
+                      ...(monospaceContent ? { fontFamily: 'monospace' } : {}),
+                    }}
                   >
                     {item.agent || item.name}
                   </Typography>
@@ -108,7 +109,7 @@ const UrisTable = ({
     }}
   >
     <Box sx={{ p: 1, pb: 1, flexShrink: 0 }}>
-      <Typography variant='subtitle2' color='text.secondary'>
+      <Typography variant='caption' color='text.secondary'>
         URIs
       </Typography>
     </Box>
@@ -167,7 +168,10 @@ const UrisTable = ({
                   <TableCell>
                     <Typography
                       variant='body2'
-                      sx={{ fontFamily: 'monospace' }}
+                      sx={{
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem',
+                      }}
                     >
                       {uri.uri}
                     </Typography>
@@ -230,7 +234,7 @@ const UrisPane = ({
             variant='contained'
             color='primary'
             size='small'
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon sx={{ fontSize: '1.1rem' }} />}
             onClick={() => {}}
           >
             Create Policy
@@ -239,7 +243,7 @@ const UrisPane = ({
             variant='contained'
             color='primary'
             size='small'
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon sx={{ fontSize: '1.1rem' }} />}
             onClick={() => {}}
           >
             Create Label

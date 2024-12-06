@@ -40,9 +40,9 @@ const RiskContributorsPane = ({
         overflow: 'auto',
       }}
     >
-      <Box p={2} borderBottom={1} borderColor='divider'>
+      <Box p={1.5} borderBottom={1} borderColor='divider'>
         <Box sx={{ minWidth: 120 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth size='small'>
             <InputLabel id='rules-select-label'>Pivot</InputLabel>
             <Select
               labelId='rules-select-label'
@@ -52,7 +52,7 @@ const RiskContributorsPane = ({
               onChange={() => {}}
             >
               <MenuItem value='rules'>
-                <em>Rules</em>
+                <Typography variant='body2'>Rules</Typography>
               </MenuItem>
             </Select>
           </FormControl>
@@ -62,7 +62,7 @@ const RiskContributorsPane = ({
         component={Box}
         flex={1}
         overflow='auto'
-        maxHeight='calc(100vh - 80px)' // Allows vertical scrolling while accounting for header
+        maxHeight='calc(100vh - 80px)'
         sx={{
           ...scrollbarStyles,
           overflowY: 'auto',
@@ -72,8 +72,9 @@ const RiskContributorsPane = ({
         <Table size='small' stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell padding='checkbox'>
+              <TableCell padding='checkbox' size='small'>
                 <Checkbox
+                  size='small'
                   indeterminate={
                     selectedRisks.size > 0 &&
                     selectedRisks.size < sortedContributors.length
@@ -82,30 +83,32 @@ const RiskContributorsPane = ({
                   onChange={handleSelectAll}
                 />
               </TableCell>
-              <TableCell width='15%' align='center'>
+              <TableCell width='15%' align='center' size='small'>
                 <TableSortLabel
                   active={getSortPriority('weight') !== null}
                   direction={getSortDirection('weight')}
                   onClick={() => handleSort('weight')}
                 >
-                  Weight
+                  <Typography variant='body2'>Weight</Typography>
                   {getSortPriority('weight') && (
-                    <Box component='span' sx={{ ml: 0.5, fontSize: '0.75rem' }}>
+                    <Box component='span' sx={{ ml: 0.5, fontSize: '0.7rem' }}>
                       {getSortPriority('weight')}
                     </Box>
                   )}
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Rule</TableCell>
-              <TableCell width='20%' align='center'>
+              <TableCell size='small'>
+                <Typography variant='body2'>Rule</Typography>
+              </TableCell>
+              <TableCell width='20%' align='center' size='small'>
                 <TableSortLabel
                   active={getSortPriority('affectedEndpoints') !== null}
                   direction={getSortDirection('affectedEndpoints')}
                   onClick={() => handleSort('affectedEndpoints')}
                 >
-                  Count
+                  <Typography variant='body2'>Count</Typography>
                   {getSortPriority('affectedEndpoints') && (
-                    <Box component='span' sx={{ ml: 0.5, fontSize: '0.75rem' }}>
+                    <Box component='span' sx={{ ml: 0.5, fontSize: '0.7rem' }}>
                       {getSortPriority('affectedEndpoints')}
                     </Box>
                   )}
@@ -125,8 +128,9 @@ const RiskContributorsPane = ({
                   '&:hover': { bgcolor: 'action.hover' },
                 }}
               >
-                <TableCell padding='checkbox'>
+                <TableCell padding='checkbox' size='small'>
                   <Checkbox
+                    size='small'
                     checked={selectedRisks.has(contributor.id)}
                     onClick={e => e.stopPropagation()}
                     onChange={e => {
@@ -135,22 +139,26 @@ const RiskContributorsPane = ({
                     }}
                   />
                 </TableCell>
-                <TableCell align='center'>
+                <TableCell align='center' size='small'>
                   <Chip
                     label={contributor.weight}
                     color={getWeightColor(contributor.weight)}
                     size='small'
                   />
                 </TableCell>
-                <TableCell>
-                  <Typography color='text.primary' variant='body2'>
+                <TableCell size='small'>
+                  <Typography variant='body2' sx={{ fontSize: '0.875rem' }}>
                     {contributor.name}
                   </Typography>
-                  <Typography color='text.secondary' variant='caption'>
+                  <Typography
+                    variant='caption'
+                    color='text.secondary'
+                    sx={{ fontSize: '0.75rem' }}
+                  >
                     {contributor.category}
                   </Typography>
                 </TableCell>
-                <TableCell align='center'>
+                <TableCell align='center' size='small'>
                   <Chip
                     label={contributor.affectedEndpoints}
                     variant='outlined'

@@ -39,7 +39,7 @@ const FingerprintsPane = ({
     >
       <Box p={2} borderBottom={1} borderColor='divider'>
         <Box sx={{ minWidth: 120, mb: 2 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth size='small'>
             <InputLabel id='fingerprints-select-label'>Pivot</InputLabel>
             <Select
               labelId='fingerprints-select-label'
@@ -47,14 +47,15 @@ const FingerprintsPane = ({
               value='fingerprints'
               label='Pivot'
               onChange={() => {}}
+              size='small'
             >
               <MenuItem value='fingerprints'>
-                <em>Fingerprints</em>
+                <Typography variant='body2'>Fingerprints</Typography>
               </MenuItem>
             </Select>
           </FormControl>
         </Box>
-        <Typography variant='h6' color='text.primary'>
+        <Typography variant='subtitle2' color='text.primary'>
           Related Fingerprints
         </Typography>
       </Box>
@@ -132,6 +133,7 @@ const FingerprintsPane = ({
                 >
                   <TableCell padding='checkbox'>
                     <Checkbox
+                      size='small'
                       checked={selectedFingerprints.has(fingerprint.id)}
                       onClick={e => e.stopPropagation()}
                       onChange={e => {
@@ -141,7 +143,9 @@ const FingerprintsPane = ({
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant='body2'>{fingerprint.id}</Typography>
+                    <Typography variant='body2' sx={{ fontSize: '0.875rem' }}>
+                      {fingerprint.id}
+                    </Typography>
                   </TableCell>
                   <TableCell align='center'>
                     <Chip
