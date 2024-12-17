@@ -7,8 +7,6 @@ const ResizeHandle = ({ left, isResizing, onMouseDown }) => {
     <Box
       sx={{
         ...resizeHandleStyles(isResizing),
-        position: 'absolute',
-        left: `${left}%`,
         height: '100%',
         zIndex: 2,
       }}

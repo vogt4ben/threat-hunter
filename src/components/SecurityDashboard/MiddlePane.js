@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { scrollbarStyles } from './styles.js';
 
-const FingerprintsPane = ({
+const MiddlePane = ({
   width,
   getRelatedFingerprints,
   selectedFingerprints,
@@ -33,43 +33,58 @@ const FingerprintsPane = ({
         width: `${width}%`,
         display: 'flex',
         flexDirection: 'column',
-        borderRight: 1,
-        borderColor: 'divider',
+        overflow: 'hidden',
       }}
     >
-      <Box p={2} borderBottom={1} borderColor='divider'>
-        <Box sx={{ minWidth: 120, mb: 2 }}>
+      <Box p={1} borderBottom={1} borderColor='divider' flexShrink={0}>
+        <Box sx={{ minWidth: 120 }}>
           <FormControl fullWidth size='small'>
-            <InputLabel id='fingerprints-select-label'>Pivot</InputLabel>
+            <InputLabel
+              id='fingerprints-select-label'
+              sx={{ fontSize: '0.75rem' }}
+            >
+              Pivot
+            </InputLabel>
             <Select
               labelId='fingerprints-select-label'
               id='fingerprints-select'
               value='fingerprints'
               label='Pivot'
               onChange={() => {}}
-              size='small'
+              sx={{
+                fontSize: '0.75rem',
+                '.MuiSelect-select': {
+                  py: 0.75,
+                },
+              }}
             >
-              <MenuItem value='fingerprints'>
-                <Typography variant='body2'>Fingerprints</Typography>
+              <MenuItem
+                value='fingerprints'
+                sx={{ fontSize: '0.75rem', py: 0.5 }}
+              >
+                Fingerprints
               </MenuItem>
             </Select>
           </FormControl>
         </Box>
-        <Typography variant='subtitle2' color='text.primary'>
-          Related Fingerprints
-        </Typography>
       </Box>
-      <TableContainer
-        component={Box}
-        flex={1}
-        overflow='auto'
-        sx={scrollbarStyles}
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          ...scrollbarStyles,
+        }}
       >
-        <Table size='small' stickyHeader>
+        <Table
+          size='small'
+          stickyHeader
+          sx={{ '& td, & th': { fontSize: '0.75rem' } }}
+        >
           <TableHead>
             <TableRow>
               <TableCell padding='checkbox'>
                 <Checkbox
+                  size='small'
                   indeterminate={
                     selectedFingerprints.size > 0 &&
                     selectedFingerprints.size < getRelatedFingerprints.length
@@ -87,10 +102,21 @@ const FingerprintsPane = ({
                       setSelectedFingerprints(new Set());
                     }
                   }}
+                  sx={{
+                    p: 0.25,
+                    '& .MuiSvgIcon-root': { fontSize: '1rem' },
+                  }}
                 />
               </TableCell>
-              <TableCell>Fingerprint ID</TableCell>
-              <TableCell align='center'>
+              <TableCell sx={{ py: 0.75 }}>
+                <Typography
+                  variant='caption'
+                  sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+                >
+                  Fingerprint ID
+                </Typography>
+              </TableCell>
+              <TableCell align='center' sx={{ py: 0.75 }}>
                 <TableSortLabel
                   active={fingerprintSort.field === 'confidence'}
                   direction={
@@ -99,11 +125,17 @@ const FingerprintsPane = ({
                       : 'asc'
                   }
                   onClick={() => handleFingerprintSort('confidence')}
+                  size='small'
                 >
-                  Confidence
+                  <Typography
+                    variant='caption'
+                    sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  >
+                    Confidence
+                  </Typography>
                 </TableSortLabel>
               </TableCell>
-              <TableCell align='center'>
+              <TableCell align='center' sx={{ py: 0.75 }}>
                 <TableSortLabel
                   active={fingerprintSort.field === 'eventCount'}
                   direction={
@@ -112,8 +144,14 @@ const FingerprintsPane = ({
                       : 'asc'
                   }
                   onClick={() => handleFingerprintSort('eventCount')}
+                  size='small'
                 >
-                  Event Count
+                  <Typography
+                    variant='caption'
+                    sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  >
+                    Event Count
+                  </Typography>
                 </TableSortLabel>
               </TableCell>
             </TableRow>
@@ -129,6 +167,7 @@ const FingerprintsPane = ({
                   sx={{
                     cursor: 'pointer',
                     '&:hover': { bgcolor: 'action.hover' },
+                    '& td': { border: 0, py: 0.25 },
                   }}
                 >
                   <TableCell padding='checkbox'>
@@ -140,10 +179,17 @@ const FingerprintsPane = ({
                         e.stopPropagation();
                         handleFingerprintSelect(fingerprint.id);
                       }}
+                      sx={{
+                        p: 0.25,
+                        '& .MuiSvgIcon-root': { fontSize: '1rem' },
+                      }}
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant='body2' sx={{ fontSize: '0.875rem' }}>
+                    <Typography
+                      variant='body2'
+                      sx={{ fontSize: '0.75rem', lineHeight: 1.2 }}
+                    >
                       {fingerprint.id}
                     </Typography>
                   </TableCell>
@@ -154,6 +200,14 @@ const FingerprintsPane = ({
                         fingerprint.confidence >= 90 ? 'success' : 'warning'
                       }
                       size='small'
+                      sx={{
+                        height: '16px',
+                        '& .MuiChip-label': {
+                          fontSize: '0.75rem',
+                          px: 1,
+                          py: 0,
+                        },
+                      }}
                     />
                   </TableCell>
                   <TableCell align='center'>
@@ -162,6 +216,14 @@ const FingerprintsPane = ({
                       variant='outlined'
                       size='small'
                       color='primary'
+                      sx={{
+                        height: '16px',
+                        '& .MuiChip-label': {
+                          fontSize: '0.75rem',
+                          px: 1,
+                          py: 0,
+                        },
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -169,7 +231,11 @@ const FingerprintsPane = ({
             ) : (
               <TableRow>
                 <TableCell colSpan={4} align='center'>
-                  <Typography color='text.secondary' sx={{ py: 4 }}>
+                  <Typography
+                    variant='caption'
+                    color='text.secondary'
+                    sx={{ fontSize: '0.75rem' }}
+                  >
                     Select one or more rules to view related fingerprints
                   </Typography>
                 </TableCell>
@@ -177,9 +243,9 @@ const FingerprintsPane = ({
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </Box>
     </Box>
   );
 };
 
-export default FingerprintsPane;
+export default MiddlePane;

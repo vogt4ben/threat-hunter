@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
 
 // Import components
-import RiskContributorsPane from './RiskContributorsPane.js';
-import FingerprintsPane from './FingerprintsPane.js';
-import UrisPane from './UrisPane.js';
+import LeftPane from './LeftPane.js';
+import MiddlePane from './MiddlePane.js';
+import RightPane from './RightPane.js';
 import ResizeHandle from './ResizeHandle.js';
+import FilterBar from './FilterBar.js';
 
 // Import mock data
 import { riskContributors } from '../../data/mockRiskContributors.js';
@@ -17,8 +18,8 @@ import { fingerprintToUris } from '../../data/mockUris.js';
 
 const SecurityDashboard = () => {
   const containerRef = useRef(null);
-  const [leftWidth, setLeftWidth] = useState(32);
-  const [middleWidth, setMiddleWidth] = useState(32);
+  const [leftWidth, setLeftWidth] = useState(31.33);
+  const [middleWidth, setMiddleWidth] = useState(31.33);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingMiddle, setIsResizingMiddle] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -180,18 +181,21 @@ const SecurityDashboard = () => {
     const deltaX = ((e.clientX - startX) / containerWidth) * 100;
 
     if (isResizingLeft) {
-      const newLeftWidth = Math.min(Math.max(startLeftWidth + deltaX, 20), 45);
+      const newLeftWidth = Math.min(Math.max(startLeftWidth + deltaX, 23), 35);
       setLeftWidth(newLeftWidth);
 
-      const remainingWidth = 96 - newLeftWidth;
-      const newMiddleWidth = Math.min(middleWidth, remainingWidth - 20);
+      const remainingWidth = 94 - newLeftWidth;
+      const newMiddleWidth = Math.min(
+        Math.max(middleWidth, 23),
+        remainingWidth - 31.33,
+      );
       setMiddleWidth(newMiddleWidth);
     }
 
     if (isResizingMiddle) {
-      const maxMiddleWidth = 96 - leftWidth - 20;
+      const maxMiddleWidth = 94 - leftWidth - 31.33;
       const newMiddleWidth = Math.min(
-        Math.max(startMiddleWidth + deltaX, 20),
+        Math.max(startMiddleWidth + deltaX, 23),
         maxMiddleWidth,
       );
       setMiddleWidth(newMiddleWidth);
@@ -247,79 +251,153 @@ const SecurityDashboard = () => {
     };
   }, [isResizingLeft, isResizingMiddle]);
 
+  // Get selected rules data
+  const selectedRulesData = React.useMemo(() => {
+    return sortedContributors
+      .filter(rule => selectedRisks.has(rule.id))
+      .map(rule => ({
+        id: rule.id,
+        name: rule.name,
+      }));
+  }, [sortedContributors, selectedRisks]);
+
+  // Get selected fingerprints data
+  const selectedFingerprintsData = React.useMemo(() => {
+    return Array.from(selectedFingerprints).map(id => ({
+      id,
+      ...fingerprintData[id],
+    }));
+  }, [selectedFingerprints]);
+
+  const handleRemoveRule = ruleId => {
+    setSelectedRisks(prev => {
+      const newSelected = new Set(prev);
+      newSelected.delete(ruleId);
+      return newSelected;
+    });
+  };
+
+  const handleRemoveFingerprint = fingerprintId => {
+    setSelectedFingerprints(prev => {
+      const newSelected = new Set(prev);
+      newSelected.delete(fingerprintId);
+      return newSelected;
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setSelectedRisks(new Set());
+    setSelectedFingerprints(new Set());
+  };
+
   return (
     <Box
       ref={containerRef}
       sx={{
         display: 'flex',
-        height: '100vh',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
         bgcolor: 'background.default',
-        gap: '1%',
-        padding: '0 0.5%',
         overflow: 'hidden',
-        userSelect: isResizingLeft || isResizingMiddle ? 'none' : 'auto',
       }}
     >
-      <Box
-        sx={{
-          width: `${leftWidth}%`,
-          flexShrink: 0,
-        }}
-      >
-        <RiskContributorsPane
-          width={100}
-          sortedContributors={sortedContributors}
-          selectedRisks={selectedRisks}
-          handleSelectAll={handleSelectAll}
-          handleSelectRisk={handleSelectRisk}
-          handleSort={handleSort}
-          getSortDirection={getSortDirection}
-          getSortPriority={getSortPriority}
-        />
-      </Box>
-
-      <ResizeHandle
-        left={leftWidth + 0.5}
-        isResizing={isResizingLeft}
-        onMouseDown={handleResizeStartLeft}
+      <FilterBar
+        selectedRules={selectedRulesData}
+        selectedFingerprints={selectedFingerprintsData}
+        onRemoveRule={handleRemoveRule}
+        onRemoveFingerprint={handleRemoveFingerprint}
+        onClearAll={handleClearAllFilters}
       />
 
       <Box
         sx={{
-          width: `${middleWidth}%`,
-          flexShrink: 0,
+          display: 'flex',
+          flex: 1,
+          minHeight: 0,
+          overflow: 'hidden',
+          gap: 2,
+          userSelect: isResizingLeft || isResizingMiddle ? 'none' : 'auto',
+          position: 'relative',
+          p: 2,
         }}
       >
-        <FingerprintsPane
-          width={100}
-          getRelatedFingerprints={getRelatedFingerprints}
-          selectedFingerprints={selectedFingerprints}
-          setSelectedFingerprints={setSelectedFingerprints}
-          handleFingerprintSelect={handleFingerprintSelect}
-          fingerprintSort={fingerprintSort}
-          handleFingerprintSort={handleFingerprintSort}
-        />
-      </Box>
+        <Box
+          sx={{
+            width: `${leftWidth}%`,
+            flexShrink: 0,
+            display: 'flex',
+            overflow: 'hidden',
+            position: 'relative',
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+          }}
+        >
+          <LeftPane
+            width={100}
+            sortedContributors={sortedContributors}
+            selectedRisks={selectedRisks}
+            handleSelectAll={handleSelectAll}
+            handleSelectRisk={handleSelectRisk}
+            handleSort={handleSort}
+            getSortDirection={getSortDirection}
+            getSortPriority={getSortPriority}
+          />
+        </Box>
 
-      <ResizeHandle
-        left={leftWidth + middleWidth + 1.5}
-        isResizing={isResizingMiddle}
-        onMouseDown={handleResizeStartMiddle}
-      />
-
-      <Box
-        sx={{
-          width: `${96 - leftWidth - middleWidth}%`,
-          flexShrink: 0,
-        }}
-      >
-        <UrisPane
-          width={100}
-          sortedUris={sortedUris}
-          selectedFingerprints={selectedFingerprints}
-          uriSort={uriSort}
-          handleUriSort={handleUriSort}
+        <ResizeHandle
+          left={leftWidth}
+          isResizing={isResizingLeft}
+          onMouseDown={handleResizeStartLeft}
         />
+
+        <Box
+          sx={{
+            width: `${middleWidth}%`,
+            flexShrink: 0,
+            display: 'flex',
+            overflow: 'hidden',
+            position: 'relative',
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+          }}
+        >
+          <MiddlePane
+            width={100}
+            getRelatedFingerprints={getRelatedFingerprints}
+            selectedFingerprints={selectedFingerprints}
+            setSelectedFingerprints={setSelectedFingerprints}
+            handleFingerprintSelect={handleFingerprintSelect}
+            fingerprintSort={fingerprintSort}
+            handleFingerprintSort={handleFingerprintSort}
+          />
+        </Box>
+
+        <ResizeHandle
+          left={leftWidth + middleWidth}
+          isResizing={isResizingMiddle}
+          onMouseDown={handleResizeStartMiddle}
+        />
+
+        <Box
+          sx={{
+            width: `${94 - leftWidth - middleWidth}%`,
+            flexShrink: 0,
+            display: 'flex',
+            overflow: 'hidden',
+            position: 'relative',
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+          }}
+        >
+          <RightPane
+            width={100}
+            sortedUris={sortedUris}
+            selectedFingerprints={selectedFingerprints}
+            uriSort={uriSort}
+            handleUriSort={handleUriSort}
+          />
+        </Box>
       </Box>
     </Box>
   );
