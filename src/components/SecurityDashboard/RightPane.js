@@ -21,41 +21,77 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { getMethodColor } from '../../utils/colorHelpers.js';
 import { scrollbarStyles } from './styles.js';
-import { userAgents } from '../../data/mockUserAgents.js';
-import { organizations } from '../../data/mockOrganizations.js';
-import { countries } from '../../data/mockCountries.js';
-import { isps } from '../../data/mockIsps.js';
+import { fingerprintToUserAgents } from '../../data/mockUserAgents.js';
+import { fingerprintToOrganizations } from '../../data/mockOrganizations.js';
+import { fingerprintToCountries } from '../../data/mockCountries.js';
+import { fingerprintToIsps } from '../../data/mockIsps.js';
 
-const CompactDataTable = ({ title, data, monospaceContent = false }) => {
+const CompactDataTable = ({ title, data, sort, handleSort }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const displayItems = isExpanded ? data : data.slice(0, 5);
   const hasMore = data.length > 5;
 
   return (
-    <>
-      <Table size='small' sx={{ '& td, & th': { fontSize: '0.75rem' } }}>
-        <TableBody>
-          {displayItems.map(item => (
+    <Table size='small' sx={{ '& td, & th': { fontSize: '0.75rem' } }}>
+      <TableHead>
+        <TableRow sx={{ '& th': { py: 0.5 } }}>
+          <TableCell>
+            <TableSortLabel
+              active={sort.field === 'name'}
+              direction={sort.field === 'name' ? sort.order : 'asc'}
+              onClick={() => handleSort('name')}
+              size='small'
+            >
+              <Typography
+                variant='caption'
+                sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+              >
+                {title}
+              </Typography>
+            </TableSortLabel>
+          </TableCell>
+          <TableCell align='right'>
+            <TableSortLabel
+              active={sort.field === 'count'}
+              direction={sort.field === 'count' ? sort.order : 'asc'}
+              onClick={() => handleSort('count')}
+              size='small'
+            >
+              <Typography
+                variant='caption'
+                sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+              >
+                Count
+              </Typography>
+            </TableSortLabel>
+          </TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {displayItems.length > 0 ? (
+          displayItems.map((item, index) => (
             <TableRow
-              key={item.id}
+              key={index}
+              hover
               sx={{
                 '&:hover': { bgcolor: 'action.hover' },
                 '& td': { border: 0, py: 0.25 },
               }}
             >
-              <TableCell sx={{ pl: 0 }}>
+              <TableCell>
                 <Typography
                   variant='body2'
                   sx={{
                     fontSize: '0.75rem',
                     lineHeight: 1.2,
-                    ...(monospaceContent ? { fontFamily: 'monospace' } : {}),
+                    wordBreak: 'break-all',
+                    maxWidth: '100%',
                   }}
                 >
-                  {item.agent || item.name}
+                  {item.name || item.agent}
                 </Typography>
               </TableCell>
-              <TableCell align='right' sx={{ pr: 0 }}>
+              <TableCell align='right'>
                 <Chip
                   label={item.count}
                   variant='outlined'
@@ -68,29 +104,41 @@ const CompactDataTable = ({ title, data, monospaceContent = false }) => {
                 />
               </TableCell>
             </TableRow>
-          ))}
-          {hasMore && (
-            <TableRow>
-              <TableCell colSpan={2} align='center' sx={{ py: 0.5 }}>
-                <Button
-                  size='small'
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  sx={{
-                    fontSize: '0.75rem',
-                    textTransform: 'none',
-                    py: 0.25,
-                    minHeight: 0,
-                    minWidth: 0,
-                  }}
-                >
-                  {isExpanded ? 'Show less' : `Show ${data.length - 5} more...`}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={2} align='center'>
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                sx={{ fontSize: '0.75rem' }}
+              >
+                Select fingerprints to view data
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {hasMore && (
+          <TableRow>
+            <TableCell colSpan={2} align='center' sx={{ py: 0.5 }}>
+              <Button
+                size='small'
+                onClick={() => setIsExpanded(!isExpanded)}
+                sx={{
+                  fontSize: '0.75rem',
+                  textTransform: 'none',
+                  py: 0.25,
+                  minHeight: 0,
+                  minWidth: 0,
+                }}
+              >
+                {isExpanded ? 'Show less' : `Show ${data.length - 5} more...`}
+              </Button>
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   );
 };
 
@@ -105,11 +153,7 @@ const UrisTable = ({
   const hasMore = sortedUris.length > 5;
 
   return (
-    <Table
-      size='small'
-      stickyHeader
-      sx={{ '& td, & th': { fontSize: '0.75rem' } }}
-    >
+    <Table size='small' sx={{ '& td, & th': { fontSize: '0.75rem' } }}>
       <TableHead>
         <TableRow sx={{ '& th': { py: 0.5 } }}>
           <TableCell>
@@ -174,7 +218,6 @@ const UrisTable = ({
                 <Typography
                   variant='body2'
                   sx={{
-                    fontFamily: 'monospace',
                     fontSize: '0.75rem',
                     lineHeight: 1.2,
                     wordBreak: 'break-all',
@@ -287,6 +330,19 @@ const RightPane = ({
     'isps',
   ]);
   const [activeTab, setActiveTab] = useState(0);
+  const [countrySort, setCountrySort] = useState({
+    field: 'count',
+    order: 'desc',
+  });
+  const [userAgentSort, setUserAgentSort] = useState({
+    field: 'count',
+    order: 'desc',
+  });
+  const [organizationSort, setOrganizationSort] = useState({
+    field: 'count',
+    order: 'desc',
+  });
+  const [ispSort, setIspSort] = useState({ field: 'count', order: 'desc' });
 
   const handleAccordionChange = panel => (event, isExpanded) => {
     setExpanded(prev => {
@@ -300,6 +356,84 @@ const RightPane = ({
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+  };
+
+  const getAggregatedData = fingerprintMap => {
+    const allData = [];
+    selectedFingerprints.forEach(fingerprintId => {
+      const items = fingerprintMap[fingerprintId] || [];
+      allData.push(...items);
+    });
+
+    const dataMap = new Map();
+    allData.forEach(item => {
+      const key = item.name || item.agent;
+      if (dataMap.has(key)) {
+        dataMap.get(key).count += item.count;
+      } else {
+        dataMap.set(key, { ...item });
+      }
+    });
+
+    return Array.from(dataMap.values());
+  };
+
+  const sortData = (data, sort) => {
+    return [...data].sort((a, b) => {
+      const isAsc = sort.order === 'asc';
+      const valueA = a[sort.field];
+      const valueB = b[sort.field];
+
+      if (typeof valueA === 'string') {
+        return isAsc
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      return isAsc ? valueA - valueB : valueB - valueA;
+    });
+  };
+
+  const sortedCountries = sortData(
+    getAggregatedData(fingerprintToCountries),
+    countrySort,
+  );
+  const sortedUserAgents = sortData(
+    getAggregatedData(fingerprintToUserAgents),
+    userAgentSort,
+  );
+  const sortedOrganizations = sortData(
+    getAggregatedData(fingerprintToOrganizations),
+    organizationSort,
+  );
+  const sortedIsps = sortData(getAggregatedData(fingerprintToIsps), ispSort);
+
+  const handleCountrySort = field => {
+    setCountrySort(prev => ({
+      field,
+      order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
+  };
+
+  const handleUserAgentSort = field => {
+    setUserAgentSort(prev => ({
+      field,
+      order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
+  };
+
+  const handleOrganizationSort = field => {
+    setOrganizationSort(prev => ({
+      field,
+      order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
+  };
+
+  const handleIspSort = field => {
+    setIspSort(prev => ({
+      field,
+      order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
   };
 
   const renderTabContent = () => {
@@ -359,10 +493,18 @@ const RightPane = ({
                   '& .MuiAccordionSummary-content': { my: 0 },
                 }}
               >
-                <AccordionHeader title='Countries' count={countries.length} />
+                <AccordionHeader
+                  title='Countries'
+                  count={sortedCountries.length}
+                />
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0.75, pt: 0 }}>
-                <CompactDataTable title='Countries' data={countries} />
+                <CompactDataTable
+                  title='Countries'
+                  data={sortedCountries}
+                  sort={countrySort}
+                  handleSort={handleCountrySort}
+                />
               </AccordionDetails>
             </Accordion>
 
@@ -388,14 +530,15 @@ const RightPane = ({
               >
                 <AccordionHeader
                   title='User Agents'
-                  count={userAgents.length}
+                  count={sortedUserAgents.length}
                 />
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0.75, pt: 0 }}>
                 <CompactDataTable
                   title='User Agents'
-                  data={userAgents}
-                  monospaceContent={true}
+                  data={sortedUserAgents}
+                  sort={userAgentSort}
+                  handleSort={handleUserAgentSort}
                 />
               </AccordionDetails>
             </Accordion>
@@ -422,11 +565,16 @@ const RightPane = ({
               >
                 <AccordionHeader
                   title='Organizations'
-                  count={organizations.length}
+                  count={sortedOrganizations.length}
                 />
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0.75, pt: 0 }}>
-                <CompactDataTable title='Organizations' data={organizations} />
+                <CompactDataTable
+                  title='Organizations'
+                  data={sortedOrganizations}
+                  sort={organizationSort}
+                  handleSort={handleOrganizationSort}
+                />
               </AccordionDetails>
             </Accordion>
 
@@ -450,10 +598,15 @@ const RightPane = ({
                   '& .MuiAccordionSummary-content': { my: 0 },
                 }}
               >
-                <AccordionHeader title='ISPs' count={isps.length} />
+                <AccordionHeader title='ISPs' count={sortedIsps.length} />
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0.75, pt: 0 }}>
-                <CompactDataTable title='ISPs' data={isps} />
+                <CompactDataTable
+                  title='ISPs'
+                  data={sortedIsps}
+                  sort={ispSort}
+                  handleSort={handleIspSort}
+                />
               </AccordionDetails>
             </Accordion>
           </Stack>
